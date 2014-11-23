@@ -34,6 +34,7 @@ module Lowgo
     end
 
     def clean_url(url)
+      return nil unless url.present?
       host = hostname_from_url(url.first(4) == 'http' ? url : "http://#{url}")
       "http://#{host}"
     end
@@ -61,6 +62,8 @@ module Lowgo
           @url = url
           @doc = Nokogiri::HTML(open(@url))
           absolute_url(candidate_image_url, @url)
+        rescue StandardError => e
+          puts "#{e.class}: #{e.message}"
         end
 
         private
@@ -118,6 +121,8 @@ module Lowgo
         def all(brand)
           @brand = brand
           candidate_image_url rescue ''
+        rescue StandardError => e
+          puts "#{e.class}: #{e.message}"
         end
 
         def url_from_brand(brand)
@@ -134,7 +139,7 @@ module Lowgo
         end
 
         def brand_page
-          ::FbGraph::Page.fetch(@brand)
+          ::FbGraph::Page.fetch(@brand) rescue nil
         end
       end
     end
@@ -144,8 +149,11 @@ module Lowgo
       class << self
 
         def all(brand)
+          ::Crunchbase::API.key = '4db9f69ad12121140fdb65d8e0ce338a'
           @brand = brand
           candidate_image_urls rescue []
+        rescue StandardError => e
+          puts "#{e.class}: #{e.message}"
         end
 
         private
